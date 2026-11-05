@@ -15,13 +15,13 @@ export const Project = model('Project', new Schema({
 }, opts));
 const taskSchema = new Schema({
   title: { type: String, required: true, trim: true }, description: String, project: { ...ref('Project'), required: true },
-  assignee: ref('User'), creator: ref('User'),
+  assignee: ref('User'), assignees: [ref('User')], creator: ref('User'),
   status: { type: String, enum: ['backlog', 'todo', 'in_progress', 'in_review', 'done'], default: 'todo' },
   priority: { type: String, enum: ['low', 'medium', 'high', 'urgent'], default: 'medium' },
   startDate: Date, deadline: Date, order: { type: Number, default: 0 }, commentsCount: { type: Number, default: 0 },
   checklist: [{ text: String, done: { type: Boolean, default: false } }],
 }, opts);
-taskSchema.index({ project: 1, status: 1, order: 1 }); taskSchema.index({ assignee: 1, deadline: 1 });
+taskSchema.index({ project: 1, status: 1, order: 1 }); taskSchema.index({ assignee: 1, deadline: 1 }); taskSchema.index({ assignees: 1 });
 export const Task = model('Task', taskSchema);
 export const Notification = model('Notification', (() => { const s = new Schema({ user: { ...ref('User'), index: true }, type: String, message: String, link: String, read: { type: Boolean, default: false }, key: String }, opts);
   s.index({ user: 1, key: 1 }, { unique: true, partialFilterExpression: { key: { $type: 'string' } } }); return s; })());

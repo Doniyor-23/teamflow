@@ -9,9 +9,15 @@ export const listNotifications = async (req, res) => {
 export const readNotification = async (req, res) => { await Notification.updateOne({ _id: req.params.id, user: req.user._id }, { read: true }); res.json({ ok: true }); };
 export const readAll = async (req, res) => { await Notification.updateMany({ user: req.user._id, read: false }, { read: true }); res.json({ ok: true }); };
 export const deadlineScan = async () => {
-  const now = new Date(); const base = { status: { $ne: 'done' }, assignee: { $ne: null } };
-  for (const t of await Task.find({ ...base, deadline: { $gte: now, $lte: new Date(Date.now() + 864e5) } }).select('title assignee'))
-    await notify(t.assignee, 'deadline', `"${t.title}" is due within 24 hours`, '/my-tasks', `due:${t._id}`);
-  for (const t of await Task.find({ ...base, deadline: { $lt: now } }).select('title assignee'))
-    await notify(t.assignee, 'overdue', `"${t.title}" is overdue`, '/my-tasks', `late:${t._id}`);
+  const now = new Date(); const base = { status: { $ne: 'done' }, $or: [{ assignee: { $ne: null } }, { 'assignees.0': { $exists: true } }] };
+  const soon = await Task.find({ ...base, deadline: { $gte: now, $lte: new Date(Date.now() + 864e5) } }).select('title assignee assignees');
+  for (const t of soon) {
+    const list = t.assignees?.length ? t.assignees : (t.assignee ? [t.assignee] : []);
+    for (const a of list) await notify(a, 'deadline', `"${t.title}" is due within 24 hours`, '/my-tasks', `due:${t._id}:${a}`);
+  }
+  const late = await Task.find({ ...base, deadline: { $lt: now } }).select('title assignee assignees');
+  for (const t of late) {
+    const list = t.assignees?.length ? t.assignees : (t.assignee ? [t.assignee] : []);
+    for (const a of list) await notify(a, 'overdue', `"${t.title}" is overdue`, '/my-tasks', `late:${t._id}:${a}`);
+  }
 };

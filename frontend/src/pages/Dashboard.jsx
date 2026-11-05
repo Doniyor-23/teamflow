@@ -21,7 +21,7 @@ const Dashboard = () => {
         <Bar dataKey="progress" fill="#6366f1" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer> : <p className="pt-20 text-center text-sm text-slate-500">No projects yet.</p>}</div></div></div>
     <div className="grid gap-4 lg:grid-cols-2">{[['Recent activity', d.recent, (t) => `Updated ${fmt(t.updatedAt)}`], ['Upcoming deadlines', d.upcoming, (t) => `Due ${fmt(t.deadline)}`]].map(([title, list, sub]) => (
       <div key={title} className="stagger card"><h2 className="mb-3 font-semibold">{title}</h2>{list.length ? <ul className="divide-y divide-slate-100 dark:divide-slate-800">{list.map((t) => (
-        <li key={t._id} className="flex items-center justify-between py-2 text-sm"><div><p className="font-medium">{t.title}</p><p className="text-xs text-slate-500">{t.project?.name} · {name(t.assignee)} · {sub(t)}</p></div>
+        <li key={t._id} className="flex items-center justify-between py-2 text-sm"><div><p className="font-medium">{t.title}</p><p className="text-xs text-slate-500">{t.project?.name} · {(t.assignees?.length ? t.assignees.map(a => name(a)).join(', ') : name(t.assignee))} · {sub(t)}</p></div>
           <span className={`rounded-full px-2 py-0.5 text-xs ${PRIORITY[t.priority]}`}>{t.priority}</span></li>))}</ul> : <p className="text-sm text-slate-500">Nothing here yet.</p>}</div>))}</div></div>);
 };
 export default Dashboard;

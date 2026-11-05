@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useGSAP } from '@gsap/react'; import gsap from 'gsap';
-import { LayoutDashboard, CheckSquare, FolderKanban, Columns3, Users, MessageSquare, CalendarDays, Bell, Settings, LogOut, Moon, Sun, Menu, ShieldCheck } from 'lucide-react'; import { useRT } from './socket';
+import { LayoutDashboard, CheckSquare, FolderKanban, Columns3, MessageSquare, Bell, LogOut, Moon, Sun, Menu, ShieldCheck } from 'lucide-react'; import { useRT } from './socket';
 import { useAuth } from './auth'; import { reduced, Avatar } from './ui';
 const NAV = [['/', 'Dashboard', LayoutDashboard], ['/my-tasks', 'My Tasks', CheckSquare], ['/projects', 'Projects', FolderKanban], ['/kanban', 'Kanban Board', Columns3],
-  ['/team', 'Team', Users], ['/chat', 'Chat', MessageSquare], ['/calendar', 'Calendar', CalendarDays], ['/notifications', 'Notifications', Bell], ['/settings', 'Settings', Settings]];
+  ['/chat', 'Chat', MessageSquare], ['/notifications', 'Notifications', Bell]];
 const Layout = () => {
   const { user, logout } = useAuth(); const { unread } = useRT(); const items = user.role === 'member' ? NAV : [...NAV, ['/admin', 'Admin', ShieldCheck]]; const [open, setOpen] = useState(false); const main = useRef(); const side = useRef(); const loc = useLocation();
   useGSAP(() => { if (!reduced()) gsap.from('.nav-item', { x: -16, opacity: 0, stagger: 0.04, duration: 0.35, clearProps: 'all' }); }, { scope: side });
