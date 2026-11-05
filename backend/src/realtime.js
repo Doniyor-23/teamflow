@@ -8,7 +8,11 @@ export const syncProject = (pid, add, rem) => { io?.in('role:admin').socketsJoin
   add.forEach((u) => io?.in(`user:${u}`).socketsJoin(`project:${pid}`)); rem.forEach((u) => io?.in(`user:${u}`).socketsLeave(`project:${pid}`)); };
 export const kick = (uid) => io?.in(`user:${uid}`).disconnectSockets(true);
 export const initSocket = (server) => {
-  io = new Server(server, { cors: { origin: (process.env.CLIENT_ORIGIN || 'http://localhost:5173').split(','), credentials: true } });
+  const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+  io = new Server(server, { cors: { origin: allowedOrigins.length ? allowedOrigins : true, credentials: true } });
   io.use(async (s, next) => { try { const { id } = jwt.verify(s.handshake.auth.token, process.env.JWT_SECRET); const u = await User.findById(id);
     if (!u || u.active === false || !u.emailVerified) throw new Error(); s.user = u; next(); } catch { next(new Error('unauthorized')); } });
   io.on('connection', async (s) => {

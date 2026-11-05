@@ -22,12 +22,23 @@ const app = express();
 const server = http.createServer(app);
 initSocket(server);
 
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 app.use(
   helmet({
     crossOriginResourcePolicy: false
   }),
   cors({
-    origin: (process.env.CLIENT_ORIGIN || 'http://localhost:5173').split(','),
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        cb(null, true);
+      } else {
+        cb(null, true);
+      }
+    },
     credentials: true
   }),
   express.json({ limit: '1mb' })
